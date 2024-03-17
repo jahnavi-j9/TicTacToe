@@ -5,19 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tic Tac Toe</title>
     <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 20px;
+        }
         .board {
             display: grid;
             grid-template-columns: repeat(3, 100px);
             grid-template-rows: repeat(3, 100px);
             gap: 2px;
+            margin: auto;
+            margin-top: 30px;
+            border: 2px solid #333;
+            border-radius: 5px;
+            width: 306px;
+            height: 306px;
+            background-color: #fff;
         }
         .cell {
-            border: 1px solid black;
+            border: none;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 2em;
+            font-size: 3em;
             cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+        .cell:hover {
+            background-color: #ddd;
+        }
+        .cell:active {
+            transform: scale(0.9);
+        }
+        .winning-cell {
+            background-color: #ffd700;
+            animation: glow 1s ease infinite alternate;
+        }
+        @keyframes glow {
+            0% {
+                box-shadow: 0 0 5px #ffd700;
+            }
+            100% {
+                box-shadow: 0 0 20px #ffd700;
+            }
+        }
+        .message {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2em;
         }
     </style>
 </head>
@@ -34,21 +74,24 @@
         <div class="cell" onclick="makeMove(7)"></div>
         <div class="cell" onclick="makeMove(8)"></div>
     </div>
+    <div class="message" id="message"></div>
     <script>
         let currentPlayer = 'X';
         let cells = document.querySelectorAll('.cell');
+        let message = document.getElementById('message');
 
         function makeMove(index) {
             if (!cells[index].textContent) {
                 cells[index].textContent = currentPlayer;
                 if (checkWin()) {
-                    alert(currentPlayer + ' wins!');
-                    resetBoard();
+                    message.textContent = currentPlayer + ' wins!';
+                    highlightWinningCells();
+                    setTimeout(resetBoard, 1500);
                     return;
                 }
                 if (checkDraw()) {
-                    alert('It\'s a draw!');
-                    resetBoard();
+                    message.textContent = 'It\'s a draw!';
+                    setTimeout(resetBoard, 1500);
                     return;
                 }
                 currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
@@ -87,11 +130,38 @@
             return true;
         }
 
+        function highlightWinningCells() {
+            const lines = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6]
+            ];
+            for (let line of lines) {
+                if (
+                    cells[line[0]].textContent &&
+                    cells[line[0]].textContent === cells[line[1]].textContent &&
+                    cells[line[1]].textContent === cells[line[2]].textContent
+                ) {
+                    for (let index of line) {
+                        cells[index].classList.add('winning-cell');
+                    }
+                    return;
+                }
+            }
+        }
+
         function resetBoard() {
             for (let cell of cells) {
                 cell.textContent = '';
+                cell.classList.remove('winning-cell');
             }
             currentPlayer = 'X';
+            message.textContent = '';
         }
     </script>
 </body>
